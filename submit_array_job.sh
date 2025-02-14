@@ -1,26 +1,28 @@
 #!/bin/bash
 
 
-BENCHMARK=$1
-DIMENSION=$2
-NOISE=$3
-ITERATIONS=$4
-NUM_SEEDS=$5
-ACQUISITION_FUNCTION=$6
 
-#SBATCH --job-name=${BENCHMARK}_${ACQUISITION_FUNCTION}
-#SBATCH --output=slurm_logs/${BENCHMARK}_${ACQUISITION_FUNCTION}_%A_%a.out
-#SBATCH --error=slurm_logs/${BENCHMARK}_${ACQUISITION_FUNCTION}_%A_%a.err
-#SBATCH --array=0-$((${NUM_SEEDS}-1))
+#SBATCH --job-name=jes_ablations
+#SBATCH --output=slurm_logs/benchmark_%A_%a.err
+#SBATCH --error=slurm_logs/benchmark_%A_%a.err
+#SBATCH --array=1-10
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 #SBATCH --time=12:00:00
 #SBATCH -A naiss2024-22-1657
 
+# Load the required modules (adjust based on your cluster setup)
+
+# Define benchmark parameters
+BENCHMARK=$1
+DIMENSION=$2
+ITERATIONS=$3
+NOISE=$4
+ACQ=$5
 
 python main.py \
-    --acq ${ACQUISITION_FUNCTION} \
+    --acq ${ACQ} \
     --dim ${DIMENSION} \
     --f ${BENCHMARK} \
     --seed ${SLURM_ARRAY_TASK_ID} \
