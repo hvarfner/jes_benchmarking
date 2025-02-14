@@ -45,7 +45,7 @@ def run_bo(acq: str, dim: int, f="Ackley", seed=42, iters=200, noise: float = 0.
     else:
         bounds = fun.bounds
 
-    n_initial_points = 2 * (dim + 1)
+    n_initial_points = 2 * dim
     train_X = draw_sobol_samples(bounds, n=n_initial_points, q=1).squeeze(-2).to(torch.double)
     train_Y = fun(train_X).unsqueeze(-1)
 
@@ -100,6 +100,7 @@ def run_bo(acq: str, dim: int, f="Ackley", seed=42, iters=200, noise: float = 0.
 
         train_X = torch.cat([train_X, new_X])
         train_Y = torch.cat([train_Y, new_Y])
+        best_f = fun(train_X, noise=False).max()
         best_X = train_X[gp.posterior(train_X).mean.argmax()]
         in_sample_f = fun(best_X, noise=False).unsqueeze(-1)
 
@@ -109,6 +110,7 @@ def run_bo(acq: str, dim: int, f="Ackley", seed=42, iters=200, noise: float = 0.
                 "new_X": new_X.tolist(),
                 "new_Y": new_Y.item(),
                 "new_f": new_f.item(),
+                "best_f": best_f.item(),
                 "in_sample_f": in_sample_f.item(),
                 "out_of_sample_f": out_of_sample_f.item(),
                 "fit_time": t1 - t0,
