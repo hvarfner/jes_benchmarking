@@ -45,10 +45,11 @@ def get_likelihood():
     return likelihood
 
 
-def fit_gp_model(train_X: Tensor, train_Y: Tensor, bounds: Tensor, dim):
+def fit_gp_model(train_X: Tensor, train_Y: Tensor, bounds: Tensor, dim, noise_std: float):
     gp = SingleTaskGP(
         train_X=train_X, 
-        train_Y=train_Y, 
+        train_Y=train_Y,
+        train_Yvar=torch.ones_like(train_Y) * noise_std ** 2,
         covar_module=get_covar_module(d=dim),
         likelihood=get_likelihood(),
         input_transform=Normalize(d=dim, bounds=bounds)
@@ -86,7 +87,7 @@ def run_bo(
     results = []
     for i in range(iters):
         t0 = time.time()
-        gp = fit_gp_model(train_X, train_Y, bounds, fun.dim)
+        gp = fit_gp_model(train_X, train_Y, bounds, fun.dim, noise)
 
         t1 = time.time()
         if acq in ["jes", "pes"]:
