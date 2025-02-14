@@ -37,7 +37,9 @@ def save_results(
         json.dump(data, f, indent=4)
 
 
-def run_bo(acq: str, dim: int, f="Ackley", seed=42, iters=200, noise: float = 0.0):
+def run_bo(
+    acq: str, dim: int, f="Ackley", seed: int = 42, iters: int = 200, noise: float = 0.0
+):
     torch.manual_seed(seed)
     fun = globals()[f](dim=dim, negate=True, noise_std=noise)
     if f == "Ackley":
@@ -46,7 +48,9 @@ def run_bo(acq: str, dim: int, f="Ackley", seed=42, iters=200, noise: float = 0.
         bounds = fun.bounds
 
     n_initial_points = 2 * dim
-    train_X = draw_sobol_samples(bounds, n=n_initial_points, q=1).squeeze(-2).to(torch.double)
+    train_X = (
+        draw_sobol_samples(bounds, n=n_initial_points, q=1).squeeze(-2).to(torch.double)
+    )
     train_Y = fun(train_X).unsqueeze(-1)
 
     results = []
