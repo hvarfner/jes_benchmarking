@@ -13,7 +13,7 @@ SBATCH_SCRIPT="submit_botorch_job.slurm"
 
 cat <<EOF > $SBATCH_SCRIPT
 #!/bin/bash
-#SBATCH --job-name=jesteest
+#SBATCH --job-name=${BENCHMARK}_${ACQUISITION_FUNCTION}
 #SBATCH --output=slurm-%A_%a.out
 #SBATCH --error=slurm-%A_%a.err
 #SBATCH --array=0-$(($NUM_SEEDS - 1))
