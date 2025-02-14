@@ -2,7 +2,7 @@
 #SBATCH --job-name=${1}${2}_${6}
 #SBATCH --output=slurm_logs/benchmark_%A_%a.err
 #SBATCH --error=slurm_logs/benchmark_%A_%a.err
-#SBATCH --array=1-${5}
+#SBATCH --array=0-$(($5 - 1))
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
