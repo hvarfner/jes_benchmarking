@@ -19,10 +19,40 @@ from botorch.utils.sampling import draw_sobol_samples
 from torch import Tensor
 from botorch.test_functions import *
 from gpytorch.mlls import ExactMarginalLogLikelihood
+from gpytorch.likelihoods import GaussianLikelihood
+from gpytorch.kernels import MaternKernel, ScaleKernel
+from log_transformed_interval import LogTransformedInterval
+
+def get_covar_module(d: int):
+    # print(f"getting covar module")
+    covar_module = ScaleKernel(
+        MaternKernel(
+            nu=2.5,
+            ard_num_dims=d,
+            lengthscale_constraint=LogTransformedInterval(1e-2, 1e2, initial_value=1.0),
+        ),
+        outputscale_constraint=LogTransformedInterval(1e-2, 1e2, initial_value=1),
+    )
+    return covar_module
+
+
+def get_likelihood():
+    likelihood = GaussianLikelihood(
+        # NOTE implies std in [1e-2, 1e-1], shoud check for noisy experiments
+        # if we allow std down to 1e-3, model fitting errors pop up for constraints
+        noise_constraint=LogTransformedInterval(1e-4, 1e-2, initial_value=1e-3)
+    )
+    return likelihood
 
 
 def fit_gp_model(train_X: Tensor, train_Y: Tensor, bounds: Tensor, dim):
-    gp = SingleTaskGP(train_X, train_Y, input_transform=Normalize(d=dim, bounds=bounds))
+    gp = SingleTaskGP(
+        train_X=train_X, 
+        train_Y=train_Y, 
+        covar_module=get_covar_module(d=dim),
+        likelihood=get_likelihood(),
+        input_transform=Normalize(d=dim, bounds=bounds)
+    )
     mll = ExactMarginalLogLikelihood(gp.likelihood, gp)
     fit_gpytorch_mll(mll)
     return gp
