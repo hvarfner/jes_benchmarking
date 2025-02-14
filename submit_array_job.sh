@@ -5,7 +5,7 @@ BENCHMARK=$1
 DIMENSION=$2
 NOISE=$3
 ITERATIONS=$4
-NUM_SEEDS=$4
+NUM_SEEDS=$5
 ACQUISITION_FUNCTIONS=("jes" "pes" "logei")
 
 # Slurm script output
