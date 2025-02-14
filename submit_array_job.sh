@@ -8,8 +8,15 @@ ITERATIONS=$4
 NUM_SEEDS=$5
 ACQUISITION_FUNCTIONS=("jes" "pes" "logei")
 
+# Acquisition functions to run
+NUM_ACQ=${#ACQUISITION_FUNCTIONS[@]}
+
+# Total number of jobs (acquisition functions * seeds)
+TOTAL_JOBS=$((NUM_ACQ * NUM_SEEDS))
+
 # Slurm script output
 SBATCH_SCRIPT="submit_botorch_job.slurm"
+# Slurm script output
 
 cat <<EOF > $SBATCH_SCRIPT
 #!/bin/bash
@@ -23,19 +30,21 @@ cat <<EOF > $SBATCH_SCRIPT
 #SBATCH --time=3:00:00
 #SBATCH -A naiss2024-22-1657
 
-# Run for each acquisition function in parallel
+# Determine acquisition function and seed from job ID
+ACQ_INDEX=$((SLURM_ARRAY_TASK_ID % NUM_ACQ))
+SEED=$((SLURM_ARRAY_TASK_ID / NUM_ACQ))
+ACQ=\${ACQUISITION_FUNCTIONS[ACQ_INDEX]}
 
-for ACQ in "${ACQUISITION_FUNCTIONS[@]}"; do
-    echo "Running ${ACQ} with seed ${SLURM_ARRAY_TASK_ID}"
-    python main.py \
-        --acq ${ACQ} \
-        --dim ${DIMENSION} \
-        --f ${BENCHMARK} \
-        --seed ${SLURM_ARRAY_TASK_ID} \
-        --iters ${ITERATIONS} \
-        --noise ${NOISE} &
-done
+# Run the Python script for the specific acquisition function and seed
+python botorch_bo_runner.py \
+    --acq \${ACQ} \
+    --dim ${DIMENSION} \
+    --f ${BENCHMARK} \
+    --seed \${SEED} \
+    --iters ${ITERATIONS} \
+    --noise ${NOISE}
 
+echo "Completed \${ACQ} with seed \${SEED}"
 EOF
 
 # Submit the batch job
