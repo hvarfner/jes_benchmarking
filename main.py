@@ -18,10 +18,11 @@ from botorch.optim import optimize_acqf
 from botorch.utils.sampling import draw_sobol_samples
 from torch import Tensor
 from botorch.test_functions import *
-from gpytorch.mlls import ExactMarginalLogLikelihood
-from gpytorch.likelihoods import GaussianLikelihood
 from gpytorch.kernels import MaternKernel, ScaleKernel
+from gpytorch.likelihoods import GaussianLikelihood
+from gpytorch.mlls import ExactMarginalLogLikelihood
 from log_transformed_interval import LogTransformedInterval
+
 
 def get_covar_module(d: int):
     # print(f"getting covar module")
@@ -45,14 +46,16 @@ def get_likelihood():
     return likelihood
 
 
-def fit_gp_model(train_X: Tensor, train_Y: Tensor, bounds: Tensor, dim, noise_std: float):
+def fit_gp_model(
+    train_X: Tensor, train_Y: Tensor, bounds: Tensor, dim, noise_std: float
+):
     gp = SingleTaskGP(
-        train_X=train_X, 
+        train_X=train_X,
         train_Y=train_Y,
-        train_Yvar=torch.ones_like(train_Y) * noise_std ** 2,
+        train_Yvar=torch.ones_like(train_Y) * noise_std**2,
         covar_module=get_covar_module(d=dim),
         likelihood=get_likelihood(),
-        input_transform=Normalize(d=dim, bounds=bounds)
+        input_transform=Normalize(d=dim, bounds=bounds),
     )
     mll = ExactMarginalLogLikelihood(gp.likelihood, gp)
     fit_gpytorch_mll(mll)
@@ -60,21 +63,29 @@ def fit_gp_model(train_X: Tensor, train_Y: Tensor, bounds: Tensor, dim, noise_st
 
 
 def save_results(
-    data: dict, function_name: str, dim: int, acquisition_function: str, seed: int
+    data: dict, function_name: str, dim: int, acquisition_function: str, seed: int, directory: str,
 ):
-    directory = f"results/{function_name}_{dim}/{acquisition_function}"
+    directory = f"{directory}/{function_name}_{dim}/{acquisition_function}"
     os.makedirs(directory, exist_ok=True)
     with open(f"{directory}/seed_{seed}.json", "w") as f:
         json.dump(data, f, indent=4)
 
 
 def run_bo(
-    acq: str, dim: int, f="Ackley", seed: int = 42, iters: int = 200, noise: float = 0.0
+    acq: str,
+    dim: int,
+    f="Ackley",
+    seed: int = 42,
+    iters: int = 200,
+    noise: float = 0.0,
+    directory: str = "results",
 ):
     torch.manual_seed(seed)
     fun = globals()[f](dim=dim, negate=True, noise_std=noise)
     if f == "Ackley":
         bounds = torch.Tensor([(-32.768 / 4, 32.768 / 2) for _ in range(fun.dim)]).T
+    if f == "Levy":
+        bounds = torch.Tensor([(-5, 5) for _ in range(fun.dim)]).T
     else:
         bounds = fun.bounds
 
@@ -155,7 +166,12 @@ def run_bo(
         )
 
         save_results(
-            data=results, function_name=f, dim=dim, acquisition_function=acq, seed=seed
+            data=results,
+            function_name=f,
+            dim=dim,
+            acquisition_function=acq,
+            seed=seed,
+            directory=directory,
         )
         print(f"Iteration {i}")
 

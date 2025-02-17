@@ -1,4 +1,3 @@
-
 ###################### defining log trasformed interval ######################
 import math
 from typing import Any, Dict, List, Optional, Union
@@ -36,9 +35,11 @@ class LogTransformedInterval(Interval):
         # Save the untransformed initial value
         self.register_buffer(
             "initial_value_untransformed",
-            torch.tensor(initial_value).to(self.lower_bound)
-            if initial_value is not None
-            else None,
+            (
+                torch.tensor(initial_value).to(self.lower_bound)
+                if initial_value is not None
+                else None
+            ),
         )
 
         if settings.debug.on():
