@@ -103,7 +103,7 @@ def run_bo(
         t1 = time.time()
         if acq in ["jes", "pes"]:
             optimal_inputs, optimal_outputs = get_optimal_samples(
-                model=gp, bounds=bounds, num_restarts=8, num_optima=64
+                model=gp, bounds=bounds, num_restarts=4, raw_samples=2048, num_optima=64
             )
 
         if acq == "jes":
@@ -119,7 +119,8 @@ def run_bo(
         else:
             raise ValueError(f"No such acquisition function '{acq}'")
         t2 = time.time()
-
+        print(t2-t1)
+        
         candidate, _ = optimize_acqf(
             acqf,
             bounds,
