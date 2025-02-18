@@ -47,14 +47,14 @@ def get_likelihood():
 
 
 def fit_gp_model(
-    train_X: Tensor, train_Y: Tensor, bounds: Tensor, dim, noise_std: float
+    train_X: Tensor, train_Y: Tensor, bounds: Tensor, dim: int, noise_std: float | None,
 ):
     gp = SingleTaskGP(
         train_X=train_X,
         train_Y=train_Y,
         train_Yvar=torch.ones_like(train_Y) * noise_std**2,
         covar_module=get_covar_module(d=dim),
-        likelihood=get_likelihood(),
+        likelihood=get_likelihood() if noise_std is None else None,
         input_transform=Normalize(d=dim, bounds=bounds),
     )
     mll = ExactMarginalLogLikelihood(gp.likelihood, gp)
