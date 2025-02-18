@@ -41,7 +41,7 @@ def get_likelihood():
     likelihood = GaussianLikelihood(
         # NOTE implies std in [1e-2, 1e-1], shoud check for noisy experiments
         # if we allow std down to 1e-3, model fitting errors pop up for constraints
-        noise_constraint=LogTransformedInterval(1e-4, 1e-2, initial_value=1e-3)
+        noise_constraint=LogTransformedInterval(1e-4, 1e0, initial_value=1e-3)
     )
     return likelihood
 
