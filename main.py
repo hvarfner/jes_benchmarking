@@ -30,9 +30,9 @@ def get_covar_module(d: int):
         MaternKernel(
             nu=2.5,
             ard_num_dims=d,
-            lengthscale_constraint=LogTransformedInterval(2.5e-2, 1e2, initial_value=1.0),
+            lengthscale_constraint=LogTransformedInterval(0.031 , 1e2, initial_value=1.0),
         ),
-        outputscale_constraint=LogTransformedInterval(2.5e-2, 1e2, initial_value=1),
+        outputscale_constraint=LogTransformedInterval(0.031 , 1e2, initial_value=1),
     )
     return covar_module
 
@@ -127,7 +127,10 @@ def run_bo(
             q=1,
             num_restarts=16,
             raw_samples=512,
-            options={"sample_around_best": True},
+            options={
+                "sample_around_best": True,
+                "batch_limit": 128,
+            },
         )
         t3 = time.time()
 
@@ -137,7 +140,11 @@ def run_bo(
             q=1,
             num_restarts=16,
             raw_samples=4096,
-            options={"sample_around_best": True},
+            options={
+                "sample_around_best": True,
+                "batch_limit": 512,
+                     
+            },
         )
 
         new_X = candidate.detach()

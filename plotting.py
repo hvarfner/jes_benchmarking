@@ -76,9 +76,9 @@ def plot_results(benchmarks, acquisition_functions, metric, base_dirs):
     plt.show()
 
 if __name__ == "__main__":
-    benchmarks = ["Levy_4", "Hartmann_6"]
+    benchmarks = ["Levy_4", "Hartmann_4", "Hartmann_6"]
     benchmarks = ["Ackley_8", "Ackley_16", "Michalewicz_5", "Michalewicz_10"]
     acquisition_functions = ["jes", "logei"]
-    metric = "best_f"  # Choose from 'best_f', 'out_of_sample_f', 'in_sample_f'
+    metric = "opt_time"  # Choose from 'best_f', 'out_of_sample_f', 'in_sample_f'
     base_dirs = ["results_noiseless",  "old_results"]
     plot_results(benchmarks, acquisition_functions, metric, base_dirs)
