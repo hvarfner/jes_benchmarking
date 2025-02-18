@@ -30,9 +30,9 @@ def get_covar_module(d: int):
         MaternKernel(
             nu=2.5,
             ard_num_dims=d,
-            lengthscale_constraint=LogTransformedInterval(1e-2, 1e2, initial_value=1.0),
+            lengthscale_constraint=LogTransformedInterval(2.5e-2, 1e2, initial_value=1.0),
         ),
-        outputscale_constraint=LogTransformedInterval(1e-2, 1e2, initial_value=1),
+        outputscale_constraint=LogTransformedInterval(2.5e-2, 1e2, initial_value=1),
     )
     return covar_module
 
@@ -84,7 +84,7 @@ def run_bo(
     fun = globals()[f](dim=dim, negate=True, noise_std=noise)
     if f == "Ackley":
         bounds = torch.Tensor([(-32.768 / 4, 32.768 / 2) for _ in range(fun.dim)]).T
-    if f == "Levy":
+    elif f == "Levy":
         bounds = torch.Tensor([(-5, 5) for _ in range(fun.dim)]).T
     else:
         bounds = fun.bounds
