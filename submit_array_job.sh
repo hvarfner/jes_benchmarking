@@ -7,9 +7,9 @@
 #SBATCH --error=slurm_logs/benchmark_%A_%a.err
 #SBATCH --array=1-20
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=6
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=16G
-#SBATCH --time=12:00:00
+#SBATCH --time=1:00:00
 #SBATCH -A naiss2024-22-1657
 
 # Load the required modules (adjust based on your cluster setup)
