@@ -17,6 +17,7 @@ from botorch.models.transforms import Normalize
 from botorch.optim import optimize_acqf
 from botorch.utils.sampling import draw_sobol_samples
 from torch import Tensor
+from botorch.optim.initializers import gen_batch_initial_conditions
 from botorch.test_functions import *
 from gpytorch.kernels import MaternKernel, ScaleKernel
 from gpytorch.likelihoods import GaussianLikelihood
@@ -121,17 +122,57 @@ def run_bo(
         t2 = time.time()
         print(t2-t1)
         
-        candidate, _ = optimize_acqf(
-            acqf,
-            bounds,
-            q=1,
-            num_restarts=16,
-            raw_samples=512,
-            options={
-                "sample_around_best": True,
-                "batch_limit": 128,
-            },
-        )
+        if acq == "logei":
+            candidate, acqval = optimize_acqf(
+                acqf,
+                bounds,
+                q=1,
+                num_restarts=16,
+                raw_samples=1024,
+                options={
+                    "sample_around_best": False,
+                    "batch_limit": 128,
+                },
+            )
+
+            candidate, acqval_sab = optimize_acqf(
+                acqf,
+                bounds,
+                q=1,
+                num_restarts=16,
+                raw_samples=512,
+                options={
+                    "sample_around_best": True,
+                    "batch_limit": 128,
+                },
+            )
+        else:
+            candidate, acqval = optimize_acqf(
+                acqf,
+                bounds,
+                q=1,
+                num_restarts=16,
+                raw_samples=1024,
+                options={
+                    "sample_around_best": False,
+                    "batch_limit": 128,
+                },
+            )
+
+            candidate, acqval_sab = optimize_acqf(
+                acqf,
+                bounds,
+                q=1,
+                num_restarts=16,
+                raw_samples=512,
+                ic_generator=gen_batch_initial_conditions,
+                options={
+                    "sample_around_best": True,
+                    "batch_limit": 128,
+                },
+            )
+
+
         t3 = time.time()
 
         inference_loc, _ = optimize_acqf(
@@ -163,6 +204,8 @@ def run_bo(
                 "iteration": i,
                 "new_X": new_X.tolist(),
                 "new_Y": new_Y.item(),
+                "acqval": acqval.item(),
+                "acqval_sab": acqval_sab.item(),
                 "new_f": new_f.item(),
                 "best_f": best_f.item(),
                 "in_sample_f": in_sample_f.item(),
